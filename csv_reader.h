@@ -102,9 +102,9 @@ public:
 				}
 				else {
 					if (!first)
-						m_data[column].push_back(CsvField(CsvFieldDataType::kText, CsvFieldMetaType::kHeader, data));
+						m_data[column].push_back(CsvField(CsvFieldDataType::kText, CsvFieldMetaType::kHeader, data.substr(1, data.length()-2)));
 					else {
-						m_data[column].push_back(CsvField(CsvFieldDataType::kText, CsvFieldMetaType::kData, data));
+						m_data[column].push_back(CsvField(CsvFieldDataType::kText, CsvFieldMetaType::kData, data.substr(1, data.length()-2)));
 					}
 				}
 				line = line.substr(max+1);
