@@ -8,11 +8,11 @@
 #include <cassert>
 namespace csv {
 constexpr bool kDebugModeActivated = 1;
-enum class CsvFieldMetaType {
+enum class TableCellMetaType {
 	kHeader,
 	kData
 };
-enum class CsvFieldDataType {
+enum class TableCellDataType {
 	kText,
 	kDouble,
 	kInt,
@@ -21,32 +21,25 @@ enum class CsvFieldDataType {
 	kDate,
 	kBlank
 };
-class CsvField {
+class TableCell {
 private:
-	CsvFieldMetaType m_field_meta_type;
-	CsvFieldDataType m_field_data_type;
+	TableCellMetaType m_field_meta_type;
+	TableCellDataType m_field_data_type;
 	std::string m_string_value;
 public:
-	CsvField(CsvFieldDataType field_data_type, CsvFieldMetaType field_meta_type, std::string string_value)
+	TableCell(TableCellDataType field_data_type, TableCellMetaType field_meta_type, std::string string_value)
 		: m_field_data_type(field_data_type), m_field_meta_type(field_meta_type), m_string_value(string_value){}
 	std::string getValueInString() {
 		return m_string_value;
 	}
-	CsvFieldDataType getDataType() {
+	TableCellDataType getDataType() {
 		return m_field_data_type;
 	}
-	CsvFieldMetaType getMetaType() {
+	TableCellMetaType getMetaType() {
 		return m_field_meta_type;
 	}
 };
-class CsvReader {
-// Private Variables
-private:
-	std::vector<std::vector<CsvField>> m_data;
-	std::string m_file_name;
-
-// Scanning Functions
-private:
+namespace util {
 	bool is_integer(const std::string& s) {
 		return std::regex_match(s, std::regex("[(-|+)|][0-9]+"));
 	}
@@ -56,13 +49,10 @@ private:
 		double val = strtod(s.c_str(), &end);
 		return end != s.c_str() && *end == '\0' && val != HUGE_VAL;
 	}
-// Some other functions
-private:
-
-public:
-	CsvReader(std::string file_name)
-		: m_file_name(file_name){
+}
+std::vector<std::vector<TableCell>> ReadCSVFile(std::string m_file_name){
 		std::ifstream input(m_file_name);
+		std::vector<std::vector<TableCell>> m_data;
 		std::string line, data;
 		int column = 0, max = 0;
 		bool first = 0, last = 0;
@@ -70,7 +60,7 @@ public:
 		while (std::getline(input, line)) {
 			while(!last) {
 				if (!first) {
-					m_data.push_back(std::vector<CsvField>());
+					m_data.push_back(std::vector<TableCell>());
 				}
 				max = line.find(',');
 				if (max == -1) {
@@ -81,30 +71,30 @@ public:
 				data = line.substr(index, max - index);
 				if (max == index) {
 					if (!first)
-						m_data[column].push_back(CsvField(CsvFieldDataType::kBlank, CsvFieldMetaType::kHeader, ""));
+						m_data[column].push_back(TableCell(TableCellDataType::kBlank, TableCellMetaType::kHeader, ""));
 					else {
-						m_data[column].push_back(CsvField(CsvFieldDataType::kBlank, CsvFieldMetaType::kData, ""));
+						m_data[column].push_back(TableCell(TableCellDataType::kBlank, TableCellMetaType::kData, ""));
 					}
 				}
-				else if (is_double(data)) {
+				else if (util::is_double(data)) {
 					if(!first)
-						m_data[column].push_back(CsvField(CsvFieldDataType::kDouble, CsvFieldMetaType::kHeader, data));
+						m_data[column].push_back(TableCell(TableCellDataType::kDouble, TableCellMetaType::kHeader, data));
 					else {
-						m_data[column].push_back(CsvField(CsvFieldDataType::kDouble, CsvFieldMetaType::kData, data));
+						m_data[column].push_back(TableCell(TableCellDataType::kDouble, TableCellMetaType::kData, data));
 					}
 				}
-				else if (is_integer(data)) {
+				else if (util::is_integer(data)) {
 					if (!first)
-						m_data[column].push_back(CsvField(CsvFieldDataType::kInt, CsvFieldMetaType::kHeader, data));
+						m_data[column].push_back(TableCell(TableCellDataType::kInt, TableCellMetaType::kHeader, data));
 					else {
-						m_data[column].push_back(CsvField(CsvFieldDataType::kInt, CsvFieldMetaType::kData, data));
+						m_data[column].push_back(TableCell(TableCellDataType::kInt, TableCellMetaType::kData, data));
 					}
 				}
 				else {
 					if (!first)
-						m_data[column].push_back(CsvField(CsvFieldDataType::kText, CsvFieldMetaType::kHeader, data));
+						m_data[column].push_back(TableCell(TableCellDataType::kText, TableCellMetaType::kHeader, data));
 					else {
-						m_data[column].push_back(CsvField(CsvFieldDataType::kText, CsvFieldMetaType::kData, data));
+						m_data[column].push_back(TableCell(TableCellDataType::kText, TableCellMetaType::kData, data));
 					}
 				}
 				line = line.substr(max+1);
@@ -113,20 +103,11 @@ public:
 			}
 			first = 1;
 			last = 0;
-			column = 0;
-		}
-		input.close();
+		column = 0;
 	}
-	std::vector<CsvField> getVectorAtColumn(int index) {
-		return m_data[index];
-	}
-	CsvField getDataAt(int column, int row) {
-		return m_data[column][row];
-	}
-	std::vector<std::vector<CsvField>> getTable() {
-		return m_data;
-	}
-};
-using CsvFile = std::vector<std::vector<CsvField>>;
+	input.close();
+	return m_data;
+}
+using Table = std::vector<std::vector<TableCell>>;
 }
 #endif
