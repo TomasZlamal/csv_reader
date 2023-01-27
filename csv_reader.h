@@ -16,6 +16,7 @@ enum class CsvFieldDataType {
 	kText,
 	kDouble,
 	kInt,
+	// TO-DO: Implement bool and date data types
 	kBoolean,
 	kDate,
 	kBlank
@@ -28,6 +29,15 @@ private:
 public:
 	CsvField(CsvFieldDataType field_data_type, CsvFieldMetaType field_meta_type, std::string string_value)
 		: m_field_data_type(field_data_type), m_field_meta_type(field_meta_type), m_string_value(string_value){}
+	std::string getValueInString() {
+		return m_string_value;
+	}
+	CsvFieldDataType getDataType() {
+		return m_field_data_type;
+	}
+	CsvFieldMetaType getMetaType() {
+		return m_field_meta_type;
+	}
 };
 class CsvReader {
 private:
@@ -62,8 +72,16 @@ public:
 					last = 1;
 					max = line.length() - 1;
 				}
-				data = line.substr(line.find_first_not_of(' '), max - line.find_first_not_of(' '));
-				if (is_double(data)) {
+				int index = line.find_first_not_of(' ');
+				data = line.substr(index, max - index);
+				if (max == index) {
+					if (!first)
+						m_data[column].push_back(CsvField(CsvFieldDataType::kBlank, CsvFieldMetaType::kHeader, ""));
+					else {
+						m_data[column].push_back(CsvField(CsvFieldDataType::kBlank, CsvFieldMetaType::kData, ""));
+					}
+				}
+				else if (is_double(data)) {
 					if(!first)
 						m_data[column].push_back(CsvField(CsvFieldDataType::kDouble, CsvFieldMetaType::kHeader, data));
 					else {
@@ -92,7 +110,13 @@ public:
 			last = 0;
 			column = 0;
 		}
-	}	
+	}
+	std::vector<CsvField> getVectorAtColumn(int index) {
+		return m_data[index];
+	}
+	CsvField getDataAt(int column, int row) {
+		return m_data[column][row];
+	}
 };
 }
 #endif
