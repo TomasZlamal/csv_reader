@@ -44,7 +44,6 @@ private:
 	std::vector<std::vector<CsvField>> m_data;
 	std::string m_file_name;
 
-	// UTIL functions
 	bool is_integer(const std::string& s) {
 		return std::regex_match(s, std::regex("[(-|+)|][0-9]+"));
 	}
@@ -110,12 +109,16 @@ public:
 			last = 0;
 			column = 0;
 		}
+		input.close();
 	}
 	std::vector<CsvField> getVectorAtColumn(int index) {
 		return m_data[index];
 	}
 	CsvField getDataAt(int column, int row) {
 		return m_data[column][row];
+	}
+	std::vector<std::vector<CsvField>> getTable() {
+		return m_data;
 	}
 };
 }
