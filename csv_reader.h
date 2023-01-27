@@ -40,18 +40,24 @@ public:
 	}
 };
 class CsvReader {
+// Private Variables
 private:
 	std::vector<std::vector<CsvField>> m_data;
 	std::string m_file_name;
 
+// Scanning Functions
+private:
 	bool is_integer(const std::string& s) {
 		return std::regex_match(s, std::regex("[(-|+)|][0-9]+"));
 	}
+
 	bool is_double(const std::string& s) {
 		char* end = nullptr;
 		double val = strtod(s.c_str(), &end);
 		return end != s.c_str() && *end == '\0' && val != HUGE_VAL;
 	}
+// Some other functions
+private:
 
 public:
 	CsvReader(std::string file_name)
