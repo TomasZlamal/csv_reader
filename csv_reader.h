@@ -127,5 +127,6 @@ public:
 		return m_data;
 	}
 };
+using CsvFile = std::vector<std::vector<CsvField>>;
 }
 #endif
