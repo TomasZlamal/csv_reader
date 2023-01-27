@@ -13,17 +13,17 @@ An example of how you can use this class so far:
 #include "include/csv_reader.h"
 
 int main() {
-	csv::CsvReader reader("test.csv");
-	csv::CsvFile csvFile = reader.getTable();
-	csv::CsvField col1row3 = csvFile[0][2];
-	csv::CsvFieldDataType dataTypeInField = col1row3.getDataType();
+	csv::Table table = csv::ReadCSVFile("test.csv");
+	csv::TableCell col1row3 = table[0][2];
+	
+	csv::TableCellDataType dataTypeInField = col1row3.getDataType();
 
 	// convert string to the data type that it is, 
 	// which is written in the dataTypeInField variable
 	// in this case [0][2] is already a string
 	// so we don't have to do any casting
 	std::cout << "Value at [0][2] is: " << col1row3.getValueInString() << std::endl;
-	// Output: Value at [0][2] is: FEB
+	// Value at [0][2] is: FEB
 	return 0;
 }
 ```
