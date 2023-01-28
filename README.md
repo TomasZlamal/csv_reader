@@ -13,7 +13,11 @@ An example of how you can use this class so far:
 #include "include/csv_reader.h"
 
 int main() {
-	csv::Table table = csv::ReadCSVFile("test.csv");
+	std::optional<csv::Table> tableOptional = csv::ReadCSVFile("test.csv");
+	if (!tableOptional) {
+		return EXIT_FAILURE;
+	}
+	csv::Table table = tableOptional.value();
 	csv::TableCell col1row3 = table[0][2];
 	
 	csv::TableCellDataType dataTypeInField = col1row3.getDataType();
