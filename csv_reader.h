@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string_view>
 #include <regex>
-#include <cassert>
+#include <optional>
 namespace csv {
 constexpr bool kDebugModeActivated = 1;
 enum class TableCellMetaType {
@@ -40,23 +40,27 @@ public:
 	}
 };
 namespace util {
-	bool is_integer(const std::string& s) {
-		return std::regex_match(s, std::regex("[(-|+)|][0-9]+"));
-	}
 
-	bool is_double(const std::string& s) {
-		char* end = nullptr;
-		double val = strtod(s.c_str(), &end);
-		return end != s.c_str() && *end == '\0' && val != HUGE_VAL;
-	}
+inline bool is_integer(const std::string& s) {
+	return std::regex_match(s, std::regex("[(-|+)|][0-9]+"));
 }
-std::vector<std::vector<TableCell>> ReadCSVFile(std::string m_file_name){
+
+bool is_double(const std::string& s) {
+	char* end = nullptr;
+	double val = strtod(s.c_str(), &end);
+	return end != s.c_str() && *end == '\0' && val != HUGE_VAL;
+}
+
+}
+std::optional<std::vector<std::vector<TableCell>>> ReadCSVFile(std::string m_file_name){
 		std::ifstream input(m_file_name);
+		if (!input.is_open()) {
+			return {};
+		}
 		std::vector<std::vector<TableCell>> m_data;
 		std::string line, data;
 		int column = 0, max = 0;
 		bool first = 0, last = 0;
-		if(kDebugModeActivated) assert(input.is_open());
 		while (std::getline(input, line)) {
 			while(!last) {
 				if (!first) {
@@ -70,39 +74,23 @@ std::vector<std::vector<TableCell>> ReadCSVFile(std::string m_file_name){
 				int index = line.find_first_not_of(' ');
 				data = line.substr(index, max - index);
 				if (max == index) {
-					if (!first)
-						m_data[column].push_back(TableCell(TableCellDataType::kBlank, TableCellMetaType::kHeader, ""));
-					else {
-						m_data[column].push_back(TableCell(TableCellDataType::kBlank, TableCellMetaType::kData, ""));
-					}
+					m_data[column].push_back(TableCell(TableCellDataType::kBlank, TableCellMetaType::kData, ""));
 				}
 				else if (util::is_double(data)) {
-					if(!first)
-						m_data[column].push_back(TableCell(TableCellDataType::kDouble, TableCellMetaType::kHeader, data));
-					else {
-						m_data[column].push_back(TableCell(TableCellDataType::kDouble, TableCellMetaType::kData, data));
-					}
+					m_data[column].push_back(TableCell(TableCellDataType::kDouble, TableCellMetaType::kData, data));
 				}
 				else if (util::is_integer(data)) {
-					if (!first)
-						m_data[column].push_back(TableCell(TableCellDataType::kInt, TableCellMetaType::kHeader, data));
-					else {
-						m_data[column].push_back(TableCell(TableCellDataType::kInt, TableCellMetaType::kData, data));
-					}
+					m_data[column].push_back(TableCell(TableCellDataType::kInt, TableCellMetaType::kData, data));
 				}
 				else {
-					if (!first)
-						m_data[column].push_back(TableCell(TableCellDataType::kText, TableCellMetaType::kHeader, data));
-					else {
-						m_data[column].push_back(TableCell(TableCellDataType::kText, TableCellMetaType::kData, data));
-					}
+					m_data[column].push_back(TableCell(TableCellDataType::kText, TableCellMetaType::kData, data));
 				}
 				line = line.substr(max+1);
 				column += 1;
 				max = 0;
 			}
-			first = 1;
-			last = 0;
+		first = 1;
+		last = 0;
 		column = 0;
 	}
 	input.close();
