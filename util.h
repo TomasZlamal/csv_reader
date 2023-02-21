@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <fstream>
+#include <optional>
 namespace csv{
 enum class TableCellMetaType {
 	kHeader,
@@ -25,13 +27,13 @@ private:
 public:
 	TableCell(TableCellDataType field_data_type, TableCellMetaType field_meta_type, std::string string_value)
 		: m_field_data_type(field_data_type), m_field_meta_type(field_meta_type), m_string_value(string_value){}
-	std::string getValueInString() {
+	std::string getValueInString() const {
 		return m_string_value;
 	}
-	TableCellDataType getDataType() {
+	TableCellDataType getDataType() const {
 		return m_field_data_type;
 	}
-	TableCellMetaType getMetaType() {
+	TableCellMetaType getMetaType() const {
 		return m_field_meta_type;
   }
   void changeToStringValue(const std::string& str){

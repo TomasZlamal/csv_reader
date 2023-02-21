@@ -1,12 +1,9 @@
 #ifndef CSV_READER_INCLUDE_CSV_READER_H
 #define CSV_READER_INCLUDE_CSV_READER_H
-#include <fstream>
 #include <string_view>
 #include <regex>
-#include <optional>
 #include "util.h"
 namespace csv {
-constexpr bool kDebugModeActivated = 1;
 std::optional<csv::Table> ReadCSVFile(std::string m_file_name, char delim){
 		std::ifstream input(m_file_name);
 		if (!input.is_open()) {
